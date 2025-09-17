@@ -32,8 +32,9 @@ def czy_dziecko_obecne(obecnosc_str, godzina):
         return False
     return False
 
-# Generowanie harmonogramu
+# Generowanie harmonogramu z kolizjami i dostępnością
 harmonogram = []
+zajete_sloty = set()  # (dzien, godzina, dziecko/specjalista)
 
 for _, dziecko in dzieci.iterrows():
     zaplanowane = 0
@@ -41,20 +42,35 @@ for _, dziecko in dzieci.iterrows():
         for slot in sloty:
             if zaplanowane >= dziecko["Częstotliwość w tygodniu"]:
                 break
+
+            slot_str = slot.strftime("%H:%M")
+            klucz_dziecko = (dzien, slot_str, dziecko["Imię i nazwisko"])
+            klucz_specjalista = (dzien, slot_str, dziecko["Specjalista"])
+
+            # Sprawdź obecność dziecka
             if not czy_dziecko_obecne(dziecko["Obecność"], slot):
                 continue
+
+            # Sprawdź kolizje
+            if klucz_dziecko in zajete_sloty or klucz_specjalista in zajete_sloty:
+                continue
+
+            # Przypisz terapię
             harmonogram.append({
                 "Dzień": dzien,
-                "Godzina": slot.strftime("%H:%M"),
+                "Godzina": slot_str,
                 "Terapia": dziecko["Terapia"],
                 "Specjalista": dziecko["Specjalista"],
                 "Dziecko": dziecko["Imię i nazwisko"]
             })
+
+            # Zarezerwuj slot
+            zajete_sloty.add(klucz_dziecko)
+            zajete_sloty.add(klucz_specjalista)
             zaplanowane += 1
         if zaplanowane >= dziecko["Częstotliwość w tygodniu"]:
             break
 
-harmonogram_df = pd.DataFrame(harmonogram)
 
 # Widok dzienny z zakładkami
 st.subheader("📅 Wybierz dzień tygodnia")
