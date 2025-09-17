@@ -27,7 +27,7 @@ def czy_dziecko_obecne(obecnosc_str, godzina):
         return False
     return False
 
-# Prosty generator harmonogramu
+# Generowanie harmonogramu
 harmonogram = []
 
 for _, dziecko in dzieci.iterrows():
@@ -39,11 +39,11 @@ for _, dziecko in dzieci.iterrows():
             if not czy_dziecko_obecne(dziecko["Obecność"], slot):
                 continue
             harmonogram.append({
-                "Imię i nazwisko": dziecko["Imię i nazwisko"],
                 "Dzień": dzien,
                 "Godzina": slot.strftime("%H:%M"),
                 "Terapia": dziecko["Terapia"],
-                "Specjalista": dziecko["Specjalista"]
+                "Specjalista": dziecko["Specjalista"],
+                "Dziecko": dziecko["Imię i nazwisko"]
             })
             zaplanowane += 1
         if zaplanowane >= dziecko["Częstotliwość w tygodniu"]:
@@ -51,19 +51,23 @@ for _, dziecko in dzieci.iterrows():
 
 harmonogram_df = pd.DataFrame(harmonogram)
 
-st.subheader("📅 Harmonogram terapii")
-st.dataframe(harmonogram_df, use_container_width=True)
+# Widok kalendarzowy
+st.subheader("📅 Widok tygodniowy")
 
-# Eksport
-import io
-
-excel_buffer = io.BytesIO()
-harmonogram_df.to_excel(excel_buffer, index=False, engine='openpyxl')
-excel_buffer.seek(0)
-
-st.download_button(
-    label="📥 Pobierz harmonogram jako Excel",
-    data=excel_buffer,
-    file_name="harmonogram.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
+cols = st.columns(len(dni))
+for i, dzien in enumerate(dni):
+    with cols[i]:
+        st.markdown(f"### {dzien}")
+        dzien_df = harmonogram_df[harmonogram_df["Dzień"] == dzien]
+        for _, row in dzien_df.iterrows():
+            st.markdown(
+                f"""
+                <div style='background-color:#f0f8ff;padding:8px;margin-bottom:6px;border-left:5px solid #4682b4'>
+                    <strong>{row["Godzina"]}</strong><br>
+                    👶 <em>{row["Dziecko"]}</em><br>
+                    🧠 <strong>{row["Terapia"]}</strong><br>
+                    👩‍⚕️ {row["Specjalista"]}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
