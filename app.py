@@ -47,15 +47,11 @@ for _, dziecko in dzieci.iterrows():
             klucz_dziecko = (dzien, slot_str, dziecko["Imię i nazwisko"])
             klucz_specjalista = (dzien, slot_str, dziecko["Specjalista"])
 
-            # Sprawdź obecność dziecka
             if not czy_dziecko_obecne(dziecko["Obecność"], slot):
                 continue
-
-            # Sprawdź kolizje
             if klucz_dziecko in zajete_sloty or klucz_specjalista in zajete_sloty:
                 continue
 
-            # Przypisz terapię
             harmonogram.append({
                 "Dzień": dzien,
                 "Godzina": slot_str,
@@ -64,62 +60,53 @@ for _, dziecko in dzieci.iterrows():
                 "Dziecko": dziecko["Imię i nazwisko"]
             })
 
-            # Zarezerwuj slot
             zajete_sloty.add(klucz_dziecko)
             zajete_sloty.add(klucz_specjalista)
             zaplanowane += 1
         if zaplanowane >= dziecko["Częstotliwość w tygodniu"]:
             break
 
-# Tworzenie DataFrame z harmonogramem
 harmonogram_df = pd.DataFrame(harmonogram)
 
-# Widok dzienny z zakładkami
+# Widok siatki godzinowej
 st.subheader("📅 Wybierz dzień tygodnia")
 wybrany_dzien = st.selectbox("Dzień", dni)
 
 dzien_df = harmonogram_df[harmonogram_df["Dzień"] == wybrany_dzien]
 
-st.markdown(f"### 🗓️ Harmonogram na {wybrany_dzien}")
-
 st.markdown(f"## 🗓️ Harmonogram na {wybrany_dzien}")
 
-# Tworzymy siatkę godzinową
-siatka = "<div style='display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;'>"
+siatka = "<div style='display: grid; grid-template-columns: repeat(1, 1fr); gap: 12px;'>"
 
-# Nagłówki godzin
-for godzina in sloty:
-    siatka += f"<div style='font-weight: bold; text-align: center;'>{godzina.strftime('%H:%M')}</div>"
-
-# Bloki terapii
 for godzina in sloty:
     slot_str = godzina.strftime("%H:%M")
     slot_df = dzien_df[dzien_df["Godzina"] == slot_str]
 
+    siatka += f"<div style='padding: 6px; background-color: #f0f0f0; border-radius: 6px;'>"
+    siatka += f"<div style='font-weight: bold; font-size: 16px; color: #333;'>🕒 {slot_str}</div>"
+
     if slot_df.empty:
-        siatka += "<div style='height: 80px; background-color: #f0f0f0;'></div>"
+        siatka += "<div style='color: #999;'>Brak terapii</div>"
     else:
-        blok = ""
         for _, row in slot_df.iterrows():
-            blok += f"""
+            siatka += f"""
             <div style='
                 background-color: #d0e6ff;
-                padding: 6px;
-                margin-bottom: 4px;
+                padding: 8px;
+                margin-top: 6px;
+                border-left: 6px solid #4a90e2;
                 border-radius: 4px;
-                font-size: 13px;
+                font-size: 14px;
             '>
                 <strong>{row["Terapia"]}</strong><br>
                 👶 {row["Dziecko"]}<br>
                 👩‍⚕️ {row["Specjalista"]}
             </div>
             """
-        siatka += f"<div>{blok}</div>"
+    siatka += "</div>"
 
 siatka += "</div>"
 st.markdown(siatka, unsafe_allow_html=True)
-
-
 
 # Eksport do Excela
 excel_buffer = io.BytesIO()
