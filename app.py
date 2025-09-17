@@ -11,7 +11,7 @@ try:
     dzieci = pd.read_excel("dzieci.xlsx", sheet_name="dzieci")
     specjalisci = pd.read_excel("specjalisci.xlsx", sheet_name="Specjaliści")
 except Exception as e:
-    st.error(f"❌ Błąd przy wczytywaniu plików: {e}")
+    st.error(f"❌ Błąd przy wczytywaniu plików Excel: {e}")
     st.stop()
 
 # Sloty co 30 minut od 08:00 do 14:00
@@ -32,7 +32,7 @@ def czy_dziecko_obecne(obecnosc_str, godzina):
         return False
     return False
 
-# Generowanie harmonogramu z kolizjami i dostępnością
+# Silnik planowania terapii
 harmonogram = []
 zajete_sloty = set()  # (dzien, godzina, dziecko/specjalista)
 
@@ -71,6 +71,8 @@ for _, dziecko in dzieci.iterrows():
         if zaplanowane >= dziecko["Częstotliwość w tygodniu"]:
             break
 
+# Tworzenie DataFrame z harmonogramem
+harmonogram_df = pd.DataFrame(harmonogram)
 
 # Widok dzienny z zakładkami
 st.subheader("📅 Wybierz dzień tygodnia")
