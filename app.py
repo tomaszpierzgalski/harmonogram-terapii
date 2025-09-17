@@ -82,27 +82,36 @@ dzien_df = harmonogram_df[harmonogram_df["Dzień"] == wybrany_dzien]
 
 st.markdown(f"### 🗓️ Harmonogram na {wybrany_dzien}")
 
-for _, row in dzien_df.iterrows():
-    st.markdown(
-        f"""
-        <div style='
-            background-color: #e6f2ff;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            border-left: 6px solid #1f77b4;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        '>
-            <div style='font-size: 16px; font-weight: bold; color: #003366;'>{row["Godzina"]}</div>
-            <div style='margin-top: 4px;'>
-                👶 <strong>Dziecko:</strong> {row["Dziecko"]}<br>
-                🧠 <strong>Terapia:</strong> {row["Terapia"]}<br>
-                👩‍⚕️ <strong>Specjalista:</strong> {row["Specjalista"]}
+for godzina in sloty:
+    slot_str = godzina.strftime("%H:%M")
+    slot_df = dzien_df[dzien_df["Godzina"] == slot_str]
+
+    if slot_df.empty:
+        continue
+
+    st.markdown(f"### 🕒 {slot_str}")
+
+    for _, row in slot_df.iterrows():
+        st.markdown(
+            f"""
+            <div style='
+                background-color: #f9f9f9;
+                padding: 12px;
+                margin-bottom: 12px;
+                border-left: 6px solid #4a90e2;
+                border-radius: 6px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            '>
+                <div style='font-size: 18px; font-weight: bold; color: #333;'>{row["Terapia"]}</div>
+                <div style='margin-top: 6px; font-size: 15px;'>
+                    👶 <strong>Dziecko:</strong> {row["Dziecko"]}<br>
+                    👩‍⚕️ <strong>Specjalista:</strong> {row["Specjalista"]}
+                </div>
             </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+            """,
+            unsafe_allow_html=True
+        )
+
 
 # Eksport do Excela
 excel_buffer = io.BytesIO()
