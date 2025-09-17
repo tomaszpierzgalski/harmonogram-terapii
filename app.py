@@ -87,7 +87,7 @@ for godzina in sloty:
 
     if slot_df.empty:
         st.markdown(
-            "<div style='color:#999; font-style:italic;'>Brak terapii</div>",
+            "<div style='color:#fff; font-style:italic;'>Brak terapii</div>",
             unsafe_allow_html=True
         )
     else:
