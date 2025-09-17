@@ -76,37 +76,40 @@ dzien_df = harmonogram_df[harmonogram_df["Dzień"] == wybrany_dzien]
 
 st.markdown(f"## 🗓️ Harmonogram na {wybrany_dzien}")
 
-siatka = "<div style='display: grid; grid-template-columns: repeat(1, 1fr); gap: 12px;'>"
-
 for godzina in sloty:
     slot_str = godzina.strftime("%H:%M")
     slot_df = dzien_df[dzien_df["Godzina"] == slot_str]
 
-    siatka += f"<div style='padding: 6px; background-color: #f0f0f0; border-radius: 6px;'>"
-    siatka += f"<div style='font-weight: bold; font-size: 16px; color: #333;'>🕒 {slot_str}</div>"
+    st.markdown(
+        f"<div style='margin-top:20px; font-size:18px; font-weight:bold; color:#333;'>🕒 {slot_str}</div>",
+        unsafe_allow_html=True
+    )
 
     if slot_df.empty:
-        siatka += "<div style='color: #999;'>Brak terapii</div>"
+        st.markdown(
+            "<div style='color:#999; font-style:italic;'>Brak terapii</div>",
+            unsafe_allow_html=True
+        )
     else:
         for _, row in slot_df.iterrows():
-            siatka += f"""
-            <div style='
-                background-color: #d0e6ff;
-                padding: 8px;
-                margin-top: 6px;
-                border-left: 6px solid #4a90e2;
-                border-radius: 4px;
-                font-size: 14px;
-            '>
-                <strong>{row["Terapia"]}</strong><br>
-                👶 {row["Dziecko"]}<br>
-                👩‍⚕️ {row["Specjalista"]}
-            </div>
-            """
-    siatka += "</div>"
-
-siatka += "</div>"
-st.markdown(siatka, unsafe_allow_html=True)
+            st.markdown(
+                f"""
+                <div style='
+                    background-color: #e3f2fd;
+                    padding: 12px;
+                    margin-top: 8px;
+                    border-left: 6px solid #2196f3;
+                    border-radius: 6px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                    font-size: 15px;
+                '>
+                    <div><strong>{row["Terapia"]}</strong></div>
+                    <div>👶 <strong>Dziecko:</strong> {row["Dziecko"]}</div>
+                    <div>👩‍⚕️ <strong>Specjalista:</strong> {row["Specjalista"]}</div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
 # Eksport do Excela
 excel_buffer = io.BytesIO()
