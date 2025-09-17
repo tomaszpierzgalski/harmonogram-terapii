@@ -82,35 +82,43 @@ dzien_df = harmonogram_df[harmonogram_df["Dzień"] == wybrany_dzien]
 
 st.markdown(f"### 🗓️ Harmonogram na {wybrany_dzien}")
 
+st.markdown(f"## 🗓️ Harmonogram na {wybrany_dzien}")
+
+# Tworzymy siatkę godzinową
+siatka = "<div style='display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;'>"
+
+# Nagłówki godzin
+for godzina in sloty:
+    siatka += f"<div style='font-weight: bold; text-align: center;'>{godzina.strftime('%H:%M')}</div>"
+
+# Bloki terapii
 for godzina in sloty:
     slot_str = godzina.strftime("%H:%M")
     slot_df = dzien_df[dzien_df["Godzina"] == slot_str]
 
     if slot_df.empty:
-        continue
-
-    st.markdown(f"### 🕒 {slot_str}")
-
-    for _, row in slot_df.iterrows():
-        st.markdown(
-            f"""
+        siatka += "<div style='height: 80px; background-color: #f0f0f0;'></div>"
+    else:
+        blok = ""
+        for _, row in slot_df.iterrows():
+            blok += f"""
             <div style='
-                background-color: #f9f9f9;
-                padding: 12px;
-                margin-bottom: 12px;
-                border-left: 6px solid #4a90e2;
-                border-radius: 6px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                background-color: #d0e6ff;
+                padding: 6px;
+                margin-bottom: 4px;
+                border-radius: 4px;
+                font-size: 13px;
             '>
-                <div style='font-size: 18px; font-weight: bold; color: #333;'>{row["Terapia"]}</div>
-                <div style='margin-top: 6px; font-size: 15px;'>
-                    👶 <strong>Dziecko:</strong> {row["Dziecko"]}<br>
-                    👩‍⚕️ <strong>Specjalista:</strong> {row["Specjalista"]}
-                </div>
+                <strong>{row["Terapia"]}</strong><br>
+                👶 {row["Dziecko"]}<br>
+                👩‍⚕️ {row["Specjalista"]}
             </div>
-            """,
-            unsafe_allow_html=True
-        )
+            """
+        siatka += f"<div>{blok}</div>"
+
+siatka += "</div>"
+st.markdown(siatka, unsafe_allow_html=True)
+
 
 
 # Eksport do Excela
