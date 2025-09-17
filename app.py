@@ -1,13 +1,18 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
+import io
 
 st.set_page_config(page_title="Harmonogram terapii", layout="wide")
 st.title("🧠 Harmonogram terapii dzieci")
 
 # Wczytaj dane
-dzieci = pd.read_excel("dzieci.xlsx", sheet_name="dzieci")
-specjalisci = pd.read_excel("specjalisci.xlsx", sheet_name="Specjaliści")
+try:
+    dzieci = pd.read_excel("dzieci.xlsx", sheet_name="dzieci")
+    specjalisci = pd.read_excel("specjalisci.xlsx", sheet_name="Specjaliści")
+except Exception as e:
+    st.error(f"❌ Błąd przy wczytywaniu plików: {e}")
+    st.stop()
 
 # Sloty co 30 minut od 08:00 do 14:00
 sloty = [datetime.strptime("08:00", "%H:%M") + timedelta(minutes=30*i) for i in range(12)]
@@ -51,23 +56,35 @@ for _, dziecko in dzieci.iterrows():
 
 harmonogram_df = pd.DataFrame(harmonogram)
 
-# Widok kalendarzowy
-st.subheader("📅 Widok tygodniowy")
+# Widok dzienny z zakładkami
+st.subheader("📅 Wybierz dzień tygodnia")
+wybrany_dzien = st.selectbox("Dzień", dni)
 
-cols = st.columns(len(dni))
-for i, dzien in enumerate(dni):
-    with cols[i]:
-        st.markdown(f"### {dzien}")
-        dzien_df = harmonogram_df[harmonogram_df["Dzień"] == dzien]
-        for _, row in dzien_df.iterrows():
-            st.markdown(
-                f"""
-                <div style='background-color:#f0f8ff;padding:8px;margin-bottom:6px;border-left:5px solid #4682b4'>
-                    <strong>{row["Godzina"]}</strong><br>
-                    👶 <em>{row["Dziecko"]}</em><br>
-                    🧠 <strong>{row["Terapia"]}</strong><br>
-                    👩‍⚕️ {row["Specjalista"]}
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+dzien_df = harmonogram_df[harmonogram_df["Dzień"] == wybrany_dzien]
+
+st.markdown(f"### 🗓️ Harmonogram na {wybrany_dzien}")
+
+for _, row in dzien_df.iterrows():
+    st.markdown(
+        f"""
+        <div style='background-color:#f0f8ff;padding:8px;margin-bottom:6px;border-left:5px solid #4682b4'>
+            <strong>{row["Godzina"]}</strong><br>
+            👶 <em>{row["Dziecko"]}</em><br>
+            🧠 <strong>{row["Terapia"]}</strong><br>
+            👩‍⚕️ {row["Specjalista"]}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+# Eksport do Excela
+excel_buffer = io.BytesIO()
+harmonogram_df.to_excel(excel_buffer, index=False, engine='openpyxl')
+excel_buffer.seek(0)
+
+st.download_button(
+    label="📥 Pobierz cały harmonogram jako Excel",
+    data=excel_buffer,
+    file_name="harmonogram.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
