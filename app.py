@@ -85,11 +85,20 @@ st.markdown(f"### 🗓️ Harmonogram na {wybrany_dzien}")
 for _, row in dzien_df.iterrows():
     st.markdown(
         f"""
-        <div style='background-color:#f0f8ff;padding:8px;margin-bottom:6px;border-left:5px solid #4682b4'>
-            <strong>{row["Godzina"]}</strong><br>
-            👶 <em>{row["Dziecko"]}</em><br>
-            🧠 <strong>{row["Terapia"]}</strong><br>
-            👩‍⚕️ {row["Specjalista"]}
+        <div style='
+            background-color: #e6f2ff;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 6px solid #1f77b4;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        '>
+            <div style='font-size: 16px; font-weight: bold; color: #003366;'>{row["Godzina"]}</div>
+            <div style='margin-top: 4px;'>
+                👶 <strong>Dziecko:</strong> {row["Dziecko"]}<br>
+                🧠 <strong>Terapia:</strong> {row["Terapia"]}<br>
+                👩‍⚕️ <strong>Specjalista:</strong> {row["Specjalista"]}
+            </div>
         </div>
         """,
         unsafe_allow_html=True
