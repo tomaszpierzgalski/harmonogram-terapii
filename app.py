@@ -55,4 +55,15 @@ st.subheader("📅 Harmonogram terapii")
 st.dataframe(harmonogram_df, use_container_width=True)
 
 # Eksport
-st.download_button("📥 Pobierz harmonogram jako Excel", harmonogram_df.to_excel(index=False), file_name="harmonogram.xlsx")
+import io
+
+excel_buffer = io.BytesIO()
+harmonogram_df.to_excel(excel_buffer, index=False, engine='openpyxl')
+excel_buffer.seek(0)
+
+st.download_button(
+    label="📥 Pobierz harmonogram jako Excel",
+    data=excel_buffer,
+    file_name="harmonogram.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
