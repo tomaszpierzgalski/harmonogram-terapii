@@ -95,7 +95,7 @@ for godzina in sloty:
             st.markdown(
                 f"""
                 <div style='
-                    background-color: #e3f2fd;
+                    background-color: #000;
                     padding: 12px;
                     margin-top: 8px;
                     border-left: 6px solid #2196f3;
